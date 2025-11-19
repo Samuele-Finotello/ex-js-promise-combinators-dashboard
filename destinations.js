@@ -9,9 +9,28 @@ async function getDashboardData(query) {
   const weathersPromise = fetchJson(`http://localhost:3333/weathers?search=${query}`)
   const airportsPromise = fetchJson(`http://localhost:3333/airports?search=${query}`)
 
-  Promise.all([destinationsPromise, weathersPromise, airportsPromise])
-    .then(res => console.log(res))
-    .catch(error => console.error(error))
+  const [destinations, weathers, airports] = await Promise.all([destinationsPromise, weathersPromise, airportsPromise]);
+
+  return {
+    city: destinations[0].name,
+    country: destinations[0].country,
+    temperature: weathers[0].temperature,
+    weather: weathers[0].weather_description,
+    airport: airports[0].name
+  }
 }
 
-getDashboardData('london')
+(async () => {
+  try {
+    const result = await getDashboardData('london')
+    console.log('Dashboard: ', result)
+    console.log(
+      `${result.city} is in ${result.country}.\n` +
+      `Today there are ${result.temperature} degrees and the weather is ${result.weather}.\n` +
+      `The main airport is ${result.airport}.\n`
+    );
+  }
+  catch (error) {
+    console.error(error)
+  }
+})()
